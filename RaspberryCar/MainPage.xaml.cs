@@ -102,6 +102,18 @@ namespace RaspberryCar
 
         private void SliderSt_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
         {
+            double SteeringDg = Math.Abs(e.NewValue);
+            if (e.NewValue < 0 && e.NewValue > -45)
+            {
+
+                double PWMSt = 0.075 - (0.025 * SteeringDg / 45);
+                servopin[0].SetActiveDutyCyclePercentage(PWMSt);
+            }
+            else if (e.NewValue > 0 && e.NewValue < 45)
+            {
+                double PWMSt = 0.075 + (0.025 * SteeringDg / 45);
+                servopin[0].SetActiveDutyCyclePercentage(PWMSt);
+            }
 
         }
 
