@@ -2,7 +2,7 @@
 ## Inhalt
 1. Idee
 2. Lernphase  
-  Gpio-Controller 
+  GPIO-Controller 
   PWM-Controller  
   XBox Controller 
   Netzwerk Programmierung
@@ -45,7 +45,10 @@ Mit ``pwm.OpenPin(int)`` wird dann der zu benutzende Pin definiert. Die Variable
 Mit ``SetActiveDutyCyclePercentage()`` und dem Prozentsatz als *double*, mit dem der Pin an sein soll, in den Klammern als Befehl für die Pin Variable, kann die Eingeschaltete Zeit bestimmt werden.  
 Letztendlich muss der DutyCycle noch gestartet werden. Dies geschieht mit dem Befehl ``Start()`` für die Pinvariable. 
 
-Bei Servos 
+Bei Servomotoren, also Motoren die einen bestimmten Winckel einstellen können, funktioniert die Winckelsteuerung etwas anders. 
+Hier hat der Motor selber noch einen Chip eingebaut, der dafür sorgt, das das Eingangssignal verarbeitet wird. 
+Bei einem DutyCycle von 60Hz bzw. 20ms muss der Pin 1,5ms angeschaltet werden, damit der Motor in einer mitleren Stellung ist. Bei 1ms ist der Motor meistens bis zum Anschlag nach links gedreht und bei 2ms nach rechts. In dem Bereich von 5-10% können sich also die Werte für den Servomotor befinden. 
+Da mein Antriebsmotor mehr Spannung braucht, als der Pi abgeben kann, ist zwischen diesen und den Pi ein *Electronic Speed Controller* kurz *ESC* geschaltet. Dieser Erwartet ebenfalls ein Servo-Eingangssignal. Also bei 5% dreht sich der Motor gar nicht und bei 10% DutyCycle mit 100%.  
 
 ### XBox-Controller Input
 Für das Benutzen des XBox-Controllers wird der Namespace ``Windows.Gaming.Input`` benötigt. Am Anfang muss dann eine Variable des Typs *Gampad* initialisiert werden. 
@@ -134,3 +137,14 @@ Diesen Part konnte ich auf Grund von Netzwerkproblemen leider nicht in mein Prog
 
 ## Harbware-Bau
 Ich habe die Hardware vor allem aus Lego-bausteinen erstellt, weil das die variabelste Struktur bot.
+![1](https://github.com/JayWee/RaspberryCar/blob/master/Pictures/DSC_4762.JPG)
+Das Grundgerüst des Autos.
+
+![1](https://github.com/JayWee/RaspberryCar/blob/master/Pictures/DSC_4772.JPG)
+Die erste Ebene Eingebaut (Motoren und ESC)
+
+![1](https://github.com/JayWee/RaspberryCar/blob/master/Pictures/DSC_4776.JPG)
+Das vollendete Modell mit den beiden Ebenen und dem Raspberry auf der linken und dem Batterypack für eben diesen auf der rechten Seite.
+
+![1](https://github.com/JayWee/RaspberryCar/blob/master/Pictures/DSC_4779.JPG)
+Close up der Verkabelung des Raspberry
