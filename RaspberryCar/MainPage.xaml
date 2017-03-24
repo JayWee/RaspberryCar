@@ -8,12 +8,9 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <TextBlock x:Name="Header" Text="Slider Control RaspberryCar" HorizontalAlignment="Center" VerticalAlignment="Top" Width="500" Height="50" FontSize="35" TextAlignment="Center" FontWeight="Bold" Margin="0,20,0,20"/>
+        <TextBlock x:Name="Header" Text="Control RaspberryCar" HorizontalAlignment="Center" VerticalAlignment="Top" Width="500" Height="50" FontSize="35" TextAlignment="Center" FontWeight="Bold" Margin="0,20,0,20"/>
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Width="500">
-            <Slider x:Name="SliderSt" Width="500" HorizontalAlignment="Center" Minimum="-45" Maximum="45" StepFrequency="1" Header="Steering Axis" FontSize="20" ValueChanged="SliderSt_ValueChanged"/>
-            <Button x:Name="ResetSt" HorizontalAlignment="Center" Content="Reset Steering" FontSize="13" Click="ResetSt_Click"/>
-            <Slider x:Name="SliderTh" Width="500" HorizontalAlignment="Center" Minimum="0" Maximum="100" StepFrequency="0.1" Header="Throttle" FontSize="20" ValueChanged="SliderTh_ValueChanged"/>
-            <ToggleSwitch x:Name="Direction" OnContent="Forward" OffContent="Backwards" IsOn="True" Toggled="Direction_Toggled"/>
+            <Button x:Name="CntBttn" Width="100" Height="30" VerticalAlignment="Center" HorizontalAlignment="Center" Click="CntBttn_Click"/>
             <TextBlock x:Name="TextThRe" Width="300" HorizontalAlignment="Center" Text="Throttle is overall reduced by 50%" TextAlignment="Center" FontSize="15"/>
         </StackPanel>
         <TextBlock x:Name="ErrorMessage" Width="300" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="10" TextAlignment="Left"/>

@@ -35,6 +35,7 @@ namespace RaspberryCar
         private static readonly PwmPin[] servopin = new PwmPin[SERVOPINS];
         private double reduction = 0.5;
         private double direction = 1;
+        private Gamepad Controller = null;
 
 
         public MainPage()
@@ -84,38 +85,42 @@ namespace RaspberryCar
             }
         }
 
-        private void SliderTh_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+        private async void CntBttn_Click(object sender, RoutedEventArgs e)
         {
-            if (direction == 1)
+            Gamepad.GamepadAdded += Gamepad_GamepadAdded;
+            Gamepad.GamepadRemoved += Gamepad_GamepadRemoved;
+
+            while(true)
             {
-                pwmpin[0].SetActiveDutyCyclePercentage(e.NewValue * reduction);
-            }
-            else if (direction == 0)
-            {
-                pwmpin[1].SetActiveDutyCyclePercentage(e.NewValue * reduction);
-            }
-            else
-            {
-                ErrorMessage.Text = "Dircetion Unclear";
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    if (Controller == null)
+                    {
+                        return;
+                    }
+                    
+                    var reading = Controller.GetCurrentReading();
+
+                    servopin[0].SetActiveDutyCyclePercentage(0.075 + (reading.LeftThumbstickX * 0.025));
+
+                    pwmpin[0].SetActiveDutyCyclePercentage(0.05 + (0.05 * reading.RightTrigger * reduction));
+
+                });
+
+                await Task.Delay(TimeSpan.FromMilliseconds(5));
             }
         }
 
-        private void SliderSt_ValueChanged(object sender, RangeBaseValueChangedEventArgs e)
+        private void Gamepad_GamepadRemoved(object sender, Gamepad e)
         {
-            if (e.NewValue >= -45 && e.NewValue <= 45)
-            {
-                servopin[0].SetActiveDutyCyclePercentage(0.075 + (0.025 * e.NewValue / 45));
-            }
+            CntBttn.Content = "Gamepad disconnected";
+            Controller = null;
         }
 
-        private void ResetSt_Click(object sender, RoutedEventArgs e)
+        private void Gamepad_GamepadAdded(object sender, Gamepad e)
         {
-            servopin[0].SetActiveDutyCyclePercentage(0.075);
-        }
-
-        private void Direction_Toggled(object sender, RoutedEventArgs e)
-        {
-            direction = Convert.ToDouble(Direction.IsOn);
+            CntBttn.Content = "Gamepad connected";
+            Controller = e;
         }
     }
 }
