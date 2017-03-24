@@ -43,47 +43,94 @@ private async void InitGpio()
 Mit der ersten Zeile, die mit *var* beginnt, wir der PWM-Controller auf eine kürzere Variable gesetzt. In der letzten Zeile wird dann die Zyklusfrequenz definiert. Hier eine Frequenz von 50Hz, also einer Zeit von 20ms pro Zyklus. 
 Mit ``pwm.OpenPin(int)`` wird dann der zu benutzende Pin definiert. Die Variable des Pins muss vom Typ *PwmPin* sein.
 Mit ``SetActiveDutyCyclePercentage()`` und dem Prozentsatz als *double*, mit dem der Pin an sein soll, in den Klammern als Befehl für die Pin Variable, kann die Eingeschaltete Zeit bestimmt werden.  
-Letztendlich muss der DutyCycle noch gestartet werden. Dies geschieht mit dem Befehl ``Start()`` für die Pinvariable.
+Letztendlich muss der DutyCycle noch gestartet werden. Dies geschieht mit dem Befehl ``Start()`` für die Pinvariable. 
+
+Bei Servos 
 
 ### XBox-Controller Input
 Für das Benutzen des XBox-Controllers wird der Namespace ``Windows.Gaming.Input`` benötigt. Am Anfang muss dann eine Variable des Typs *Gampad* initialisiert werden. 
 In der Methose, die ich benutzte, wird der Input über eine asynkrone *while*-Schleife gesammelt und nicht über EventHandler.  
 Dabei muss diese zuerst über einen anderen EventHandler gestartet werden. 
 ```
-private async void Start_Click(object sender, RoutedEventArgs e)
-{
-  Gamepad.GamepadAdded += Gamepad_GamepadAdded;
-  Gamepad.GamepadRemoved += Gamepad_GamepadRemoved;
-  while (true)
-  {
-    await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-    {
-      if (Controller == null)
-      {
-        return;
-      }
-      var reading = Controller.GetCurrentReading();
-               
-      StInfo.Text = (reading.LeftThumbstickX * 45).ToString();
-
-      ThInfo.Text = (reading.RightTrigger * 100).ToString();
-
-      if ((reading.Buttons & GamepadButtons.A) == GamepadButtons.A)
-      {
-          BlockBt.Text = "Lights On";
-      }
-      else
-      {
-          BlockBt.Text = "Lights Off";
-      }
-
-    });
-    await Task.Delay(TimeSpan.FromMilliseconds(5));
-  }
-}
+private async void Start_Click(object sender, RoutedEventArgs e)  
+{ 
+  Gamepad.GamepadAdded += Gamepad_GamepadAdded; 
+  Gamepad.GamepadRemoved += Gamepad_GamepadRemoved; 
+  while (true)  
+  { 
+    await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>  
+    { 
+      if (Controller == null) 
+      { 
+        return; 
+      } 
+      var reading = Controller.GetCurrentReading(); 
+                
+      StInfo.Text = (reading.LeftThumbstickX * 45).ToString();  
+  
+      ThInfo.Text = (reading.RightTrigger * 100).ToString();  
+  
+      if ((reading.Buttons & GamepadButtons.A) == GamepadButtons.A) 
+      { 
+          BlockBt.Text = "Lights On"; 
+      } 
+      else  
+      { 
+          BlockBt.Text = "Lights Off";  
+      } 
+  
+    }); 
+    await Task.Delay(TimeSpan.FromMilliseconds(5)); 
+  } 
+} 
 ```
 Der Befehl ``await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>{});`` führt den gesamten Code, der in den geschweiften Klammern steht asynkron aus. 
 Die If-Funktion überprüft, ob ein Controller verbunden ist. Die Variable *Controller* wird in den EventHandlern, die am Anfang des Codeausschnittes stehen, auf *null* gestzt, wenn kein Controller verbunden ist, und auf einen anderen Wert, wenn ein Controller verbunden ist. 
 Die nach der IF-Funktion bestimmte *var* gibt ein fast ein Namespace zusammen, der auf den vom Controller eingehenden Input zugreift. 
 Mit ``reading.`` und dem gewünschten Inputpart, können die Prozente der einzelnen Trigger des Controllers abgerufen werden. 
-Damit das Programm regelmäßig die *while*-Schleife durchgeht, wird noch ein ``Task.Delay`` am Ende der Schleife hinzugefügt.  
+Damit das Programm regelmäßig und in einer schnellen Frequenz die *while*-Schleife durchgeht, wird noch ein ``Task.Delay`` am Ende der Schleife hinzugefügt.  
+Für das Auslesen der Buttons des Controllers gibt es nur einen Auslesebefehl. Dieser kann mit einer Maske belegt werden, die für einen Button steht. In meinem Beispiel der Maske des Buttons *A*. Dies macht man durch ergänzen der eigentlichen *reading*-Variable mit einem & und der Maske mit aus dem Namespace *GamepadButtons* mit Ergänzung des Maskenbuttons.  
+
+### Netzwerk Programmierung
+Die Netzwerk Programmierung in Universial Windows Apps, kann durch sogenannte *Sockets* geschehen. Diese Stellen eine Verknüpfung zwischen dem Internet und dem Programm dar. In meinem Fall wird der Standart *TCP* benutzt. Bei diesem können einzelne Pakete in Form von *string*-Variablen verschockt werden. 
+Dafür wird ein Server und ein oder mehrere Client/Clients gebraucht. In meinem Fall schickt der Client de Server einen *string* und bekommt diesen vom Server zurückgeschickt. 
+Für das ganze wird der Namespace ``Windows.Networking.Sockets`` benötigt.
+```
+try
+{
+    StreamSocketListener Listener = new StreamSocketListener();
+
+    Listener.ConnectionReceived += Listener_ConnectionReceived;
+
+    await Listener.BindServiceNameAsync("3437");
+}
+catch (Exception e)
+{
+
+}
+```
+Das ganze findet in einer *try-catch*-funktion statt, um bei einem Fehlschlagen der Verbindung trotzdem Weiterarbeiten zu können. 
+In dem Besipiel wird der Server initialisiert. Dabei wird ein Listener aufgesetzt. Dieser "*hört*" auf Packete, die vom Client an ihn geschickt werden. Wenn er etwas hört, wird ein EventHandler aktiviert.  
+```
+private async void Listener_ConnectionReceived(StreamSocketListener sender, 
+    StreamSocketListenerConnectionReceivedEventArgs args)
+{
+    //Read line from the remote client.
+    Stream inStream = args.Socket.InputStream.AsStreamForRead();
+    StreamReader reader = new StreamReader(inStream);
+    string request = await reader.ReadLineAsync();
+
+    //Send the line back to the remote client.
+    Stream outStream = args.Socket.OutputStream.AsStreamForWrite();
+    StreamWriter writer = new StreamWriter(outStream);
+    await writer.WriteLineAsync(request);
+    await writer.FlushAsync();
+}
+```
+In dem eventHandler wird zuerst mit den ersten drei Zeilen, das Packet vom Client gelesen und in einen lokalen *string* umgewandelt.  
+Dann wird dieser wieder an den Client zurückgeschickt.  
+
+Diesen Part konnte ich auf Grund von Netzwerkproblemen leider nicht in mein Programm für das Auto mit einbauen.
+
+## Harbware-Bau
+Ich habe die Hardware vor allem aus Lego-bausteinen erstellt, weil das die variabelste Struktur bot.
