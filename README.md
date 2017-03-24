@@ -46,4 +46,43 @@ Mit ``SetActiveDutyCyclePercentage()`` und dem Prozentsatz als *double*, mit dem
 Letztendlich muss der DutyCycle noch gestartet werden. Dies geschieht mit dem Befehl ``Start()`` für die Pinvariable.
 
 ### XBox-Controller Input
-Für das Benutzen des XBox-Controllers wird 
+Für das Benutzen des XBox-Controllers wird der Namespace ``Windows.Gaming.Input`` benötigt. Am Anfang muss dann eine Variable des Typs *Gampad* initialisiert werden. 
+In der Methose, die ich benutzte, wird der Input über eine asynkrone *while*-Schleife gesammelt und nicht über EventHandler.  
+Dabei muss diese zuerst über einen anderen EventHandler gestartet werden. 
+```
+private async void Start_Click(object sender, RoutedEventArgs e)
+{
+  Gamepad.GamepadAdded += Gamepad_GamepadAdded;
+  Gamepad.GamepadRemoved += Gamepad_GamepadRemoved;
+  while (true)
+  {
+    await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+    {
+      if (Controller == null)
+      {
+        return;
+      }
+      var reading = Controller.GetCurrentReading();
+               
+      StInfo.Text = (reading.LeftThumbstickX * 45).ToString();
+
+      ThInfo.Text = (reading.RightTrigger * 100).ToString();
+
+      if ((reading.Buttons & GamepadButtons.A) == GamepadButtons.A)
+      {
+          BlockBt.Text = "Lights On";
+      }
+      else
+      {
+          BlockBt.Text = "Lights Off";
+      }
+
+    });
+    await Task.Delay(TimeSpan.FromMilliseconds(5));
+  }
+}
+```
+Der Befehl ``await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>{});`` führt den gesamten Code, der in den geschweiften Klammern steht asynkron aus. 
+Die If-Funktion überprüft, ob ein Controller verbunden ist. Die Variable *Controller* wird in den EventHandlern, die am Anfang des Codeausschnittes stehen, auf *null* gestzt, wenn kein Controller verbunden ist, und auf einen anderen Wert, wenn ein Controller verbunden ist. 
+Die nach der IF-Funktion bestimmte *var* gibt ein fast ein Namespace zusammen, der auf den vom Controller eingehenden Input zugreift. 
+Mit ``reading.`` und dem gewünschten Inputpart, können die Prozente der einzelnen Trigger des Controllers abgerufen werden. 
