@@ -2,10 +2,10 @@
 ## Inhalt
 1. Idee
 2. Lernphase  
-  GPIO-Controller 
-  PWM-Controller  
-  XBox Controller 
-  Netzwerk Programmierung
+  GPIO-Controller	
+  PWM-Controller	
+  XBox Controller	
+  Netzwerk Programmierung		
 3. Hardware-Bau
 
 ## Idee
