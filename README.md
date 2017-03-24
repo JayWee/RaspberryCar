@@ -96,8 +96,8 @@ Für das Auslesen der Buttons des Controllers gibt es nur einen Auslesebefehl. D
 
 ### Netzwerk Programmierung
 Die Netzwerk Programmierung in Universial Windows Apps, kann durch sogenannte *Sockets* geschehen. Diese Stellen eine Verknüpfung zwischen dem Internet und dem Programm dar. In meinem Fall wird der Standart *TCP* benutzt. Bei diesem können einzelne Pakete in Form von *string*-Variablen verschockt werden. 
-Dafür wird ein Server und ein oder mehrere Client/Clients gebraucht. In meinem Fall schickt der Client de Server einen *string* und bekommt diesen vom Server zurückgeschickt. 
-Für das ganze wird der Namespace ``Windows.Networking.Sockets`` benötigt.
+Dafür wird ein Server und ein oder mehrere Client/Clients gebraucht. In meinem Fall schickt der Client dem Server einen *string* und bekommt diesen vom Server zurückgeschickt. 
+Für das ganze werden die Namespaces ``Windows.Networking.Sockets`` und ``Windows.Networking`` benötigt.
 ```
 try
 {
@@ -114,6 +114,7 @@ catch (Exception e)
 ```
 Das ganze findet in einer *try-catch*-funktion statt, um bei einem Fehlschlagen der Verbindung trotzdem Weiterarbeiten zu können. 
 In dem Besipiel wird der Server initialisiert. Dabei wird ein Listener aufgesetzt. Dieser "*hört*" auf Packete, die vom Client an ihn geschickt werden. Wenn er etwas hört, wird ein EventHandler aktiviert.  
+Außerdem bindet die letzte Zeile die Übertragung an einen Bestimmten Port. 
 ```
 private async void Listener_ConnectionReceived(StreamSocketListener sender, 
     StreamSocketListenerConnectionReceivedEventArgs args)
@@ -131,7 +132,37 @@ private async void Listener_ConnectionReceived(StreamSocketListener sender,
 }
 ```
 In dem eventHandler wird zuerst mit den ersten drei Zeilen, das Packet vom Client gelesen und in einen lokalen *string* umgewandelt.  
-Dann wird dieser wieder an den Client zurückgeschickt.  
+Dann wird dieser wieder an den Client zurückgeschickt.  Hier das volständige <a href="https://github.com/JayWee/NetcodeTestServer">Serverprogramm</a>.
+
+
+```
+try
+{
+    StreamSocket socket = new StreamSocket();
+
+    HostName Host = new HostName("localhost");
+
+    string Port = "3437";
+    await socket.ConnectAsync(Host, Port);
+
+    Stream streamOut = socket.OutputStream.AsStreamForWrite();
+    StreamWriter writer = new StreamWriter(streamOut);
+    string request = "test";
+    await writer.WriteLineAsync(request);
+    await writer.FlushAsync();
+
+    Stream streamIn = socket.InputStream.AsStreamForRead();
+    StreamReader reader = new StreamReader(streamIn);
+    string response = await reader.ReadLineAsync();
+}
+catch (Exception e)
+{
+
+}
+```
+Beim Client wird zuerst ein Socket als Schnittstell zum Internet erstellt. Danach wird der Host, also der Server, und der dazu gehörige Port dem Socket bereitgestellt. 
+Danach schreibt der Client einen *string* und sendet diesen an den Server. Dann wartet er auf die Antwort des Servers und schreibt diese in eine lokale *string*-Variable.  
+Hier das volständige <a href="https://github.com/JayWee/NetcodeTestClient">Clientprogramm</a>.
 
 Diesen Part konnte ich auf Grund von Netzwerkproblemen leider nicht in mein Programm für das Auto mit einbauen.
 
@@ -148,3 +179,6 @@ Das vollendete Modell mit den beiden Ebenen und dem Raspberry auf der linken und
 
 ![1](https://github.com/JayWee/RaspberryCar/blob/master/Pictures/DSC_4779.JPG)
 Close up der Verkabelung des Raspberry
+
+
+Das letzendliche Programm finden sie als *.sln* (Visual Studio Projekt) in diesem Repository.
