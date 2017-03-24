@@ -86,3 +86,4 @@ Der Befehl ``await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>{});`
 Die If-Funktion überprüft, ob ein Controller verbunden ist. Die Variable *Controller* wird in den EventHandlern, die am Anfang des Codeausschnittes stehen, auf *null* gestzt, wenn kein Controller verbunden ist, und auf einen anderen Wert, wenn ein Controller verbunden ist. 
 Die nach der IF-Funktion bestimmte *var* gibt ein fast ein Namespace zusammen, der auf den vom Controller eingehenden Input zugreift. 
 Mit ``reading.`` und dem gewünschten Inputpart, können die Prozente der einzelnen Trigger des Controllers abgerufen werden. 
+Damit das Programm regelmäßig die *while*-Schleife durchgeht, wird noch ein ``Task.Delay`` am Ende der Schleife hinzugefügt.  
